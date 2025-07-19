@@ -444,7 +444,6 @@ const result = await dictionary.search('berlari', {
   includePeribahasa: true,
   includeTesaurus: true
 });
-```
 
 // Process multiple definitions from different sources
 result.definitions.forEach((def, index) => {
