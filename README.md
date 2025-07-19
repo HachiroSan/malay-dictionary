@@ -1,6 +1,6 @@
 # Malay Dictionary
 
-A Node.js library to access Malay definitions from the Dewan Bahasa dan Pustaka (DBP) website. This library allows you to search for both English words and Malay words, providing comprehensive Malay definitions, along with related information like proverbs (peribahasa) and related services.
+A Node.js library to access Malay definitions from the Dewan Bahasa dan Pustaka (DBP) website. This library allows you to search for both English words and Malay words, providing comprehensive Malay definitions, along with related information like proverbs (peribahasa) and thesaurus data.
 
 ## Table of Contents
 
@@ -8,6 +8,10 @@ A Node.js library to access Malay definitions from the Dewan Bahasa dan Pustaka 
 - [Installation](#installation)
   - [Local Development](#local-development)
   - [Usage in Development](#usage-in-development)
+- [Command Line Interface](#command-line-interface)
+  - [Quick Start](#quick-start)
+  - [CLI Examples](#cli-examples)
+  - [CLI Options](#cli-options)
 - [API Reference](#api-reference)
   - [MalayDictionary](#malaydictionary)
   - [Data Types](#data-types)
@@ -17,10 +21,6 @@ A Node.js library to access Malay definitions from the Dewan Bahasa dan Pustaka 
   - [Malay to Malay](#malay-to-malay)
   - [Advanced Usage](#advanced-usage)
   - [Batch Processing](#batch-processing)
-- [Command Line Interface](#command-line-interface)
-  - [Basic Usage](#basic-usage-1)
-  - [Advanced Options](#advanced-options)
-  - [CLI Options](#cli-options)
 - [Error Handling](#error-handling)
 - [Rate Limiting and Best Practices](#rate-limiting-and-best-practices)
 - [Contributing](#contributing)
@@ -29,18 +29,26 @@ A Node.js library to access Malay definitions from the Dewan Bahasa dan Pustaka 
 
 ## Features
 
-- Search English words and get Malay definitions (English-Malay dictionary)
-- Search Malay words and get comprehensive Malay definitions (Malay-Malay dictionary)
-- **Multiple definitions from different sources** - Get definitions from various DBP dictionaries (Kamus Dewan, Kamus Pelajar, etc.)
-- Extract structured definition data (part of speech, context, etc.)
-- Get related proverbs (peribahasa) and their explanations
-- Access related services and resources
-- Batch search multiple words
-- Configurable retry logic and rate limiting
-- Error handling and validation
-- TypeScript support with full type definitions
+- **🔤 Phonetic Transcription** - Get pronunciation guides like `[ber.la.ri]`
+- **📝 Jawi Script** - Access traditional Malay script like `برلاري`
+- **📚 Multiple Sources** - Definitions from Kamus Dewan, Kamus Pelajar, and more
+- **🌍 Bilingual Support** - Search English words for Malay definitions
+- **📖 Comprehensive Definitions** - Part of speech, context, and detailed explanations
+- **📜 Proverbs & Thesaurus** - Access peribahasa and related words
+- **⚡ CLI Tool** - Command-line interface for quick lookups
+- **🔄 Batch Processing** - Search multiple words efficiently
+- **🛡️ Error Handling** - Robust error handling and retry logic
+- **⚙️ Configurable** - Customizable timeouts, delays, and retries
+- **📦 TypeScript** - Full TypeScript support with type definitions
 
 ## Installation
+
+### Install as Package
+
+```bash
+# Install directly from GitHub
+npm install git+https://github.com/HachiroSan/malay_dictionary.git
+```
 
 ### Local Development
 
@@ -68,31 +76,93 @@ const dictionary = new MalayDictionary({
   retries: 3
 });
 
-// Search for a word
-const result = await dictionary.search('hello');
+// Search for a word with full details
+const result = await dictionary.search('berlari', {
+  includePeribahasa: true,
+  includeTesaurus: true
+});
 
 if (result.hasResults) {
-  console.log('Malay definition:', result.definitions[0].malayDefinition);
-  // Output: helo
+  const definition = result.definitions[0];
+  console.log(`Word: ${definition.word}`);
+  console.log(`Phonetic: [${definition.phonetic}]`);
+  console.log(`Jawi: ${definition.jawi}`);
+  console.log(`Definition: ${definition.malayDefinition}`);
 }
 ```
+
+### Usage as Installed Package
+
+```typescript
+import { MalayDictionary } from 'malay-dictionary';
+
+// Create a dictionary instance
+const dictionary = new MalayDictionary();
+
+// Quick search
+const result = await dictionary.search('makan');
+
+if (result.hasResults) {
+  console.log(`Definition: ${result.definitions[0].malayDefinition}`);
+  console.log(`Phonetic: [${result.definitions[0].phonetic}]`);
+  console.log(`Jawi: ${result.definitions[0].jawi}`);
+}
+```
+
+## Command Line Interface
+
+The library includes a powerful CLI tool for quick dictionary lookups with rich output:
+
+### Quick Start
+
+```bash
+# Search for Malay words with full details
+npx ts-node src/cli.ts berlari --verbose
+
+# Search for English words
+npx ts-node src/cli.ts hello
+
+# Get JSON output for programmatic use
+npx ts-node src/cli.ts makan --verbose --json
+```
+
+### CLI Examples
+
+```bash
+# Malay word with phonetic and Jawi script
+npx ts-node src/cli.ts berlari --verbose
+# Output includes:
+# - Word: berlari
+# - Phonetic: [ber.la.ri]
+# - Jawi: برلاري
+# - Multiple definitions from different sources
+# - Thesaurus information
+
+# English to Malay lookup
+npx ts-node src/cli.ts computer --verbose
+
+# Simple definition only
+npx ts-node src/cli.ts rumah
+
+# Custom settings
+npx ts-node src/cli.ts reluctant --delay 2000 --timeout 45000 --retries 5
+```
+
+### CLI Options
+
+- `--word <word>` - Word to search for
+- `--delay <ms>` - Delay between requests (default: 1000)
+- `--timeout <ms>` - Request timeout (default: 30000)
+- `--retries <number>` - Number of retries (default: 3)
+- `--verbose` - Get full results including multiple definitions, phonetic transcription, Jawi script, and thesaurus
+- `--json` - Output in JSON format
+- `--help` - Show help message
 
 ## API Reference
 
 ### MalayDictionary
 
 The main class for interacting with the DBP website.
-
-### Multiple Definitions from Different Sources
-
-The library captures definitions from multiple DBP dictionaries, providing comprehensive coverage:
-
-- **Kamus Dewan Edisi Keempat** - Comprehensive definitions with extensive examples
-- **Kamus Pelajar Edisi Kedua** - Simplified definitions for students
-- **Kamus Inggeris-Melayu Dewan** - English to Malay translations
-- **Other DBP dictionaries** - Various specialized dictionaries
-
-Each definition includes the source dictionary, allowing developers to choose the most appropriate definition for their use case.
 
 #### Constructor
 
@@ -114,8 +184,7 @@ new MalayDictionary(options?: SearchOptions)
 Search for a word and get comprehensive results.
 
 ```typescript
-const result = await dictionary.search('computer', {
-  includeRelated: true,
+const result = await dictionary.search('berlari', {
   includePeribahasa: true,
   includeTesaurus: true
 });
@@ -170,6 +239,8 @@ interface DBPResult {
 ```typescript
 interface DBPDefinition {
   word: string;
+  phonetic?: string;        // Phonetic transcription like "ber.la.ri"
+  jawi?: string;           // Jawi script like "برلاري"
   partOfSpeech?: string;
   context?: string;
   malayDefinition: string;
@@ -210,11 +281,13 @@ import { MalayDictionary } from './src/index';
 const dictionary = new MalayDictionary();
 
 // Simple search
-const result = await dictionary.search('reluctant');
+const result = await dictionary.search('berlari');
 
 if (result.hasResults) {
   const definition = result.definitions[0];
   console.log(`Word: ${definition.word}`);
+  console.log(`Phonetic: [${definition.phonetic}]`);
+  console.log(`Jawi: ${definition.jawi}`);
   console.log(`Part of Speech: ${definition.partOfSpeech}`);
   console.log(`Definition: ${definition.malayDefinition}`);
   console.log(`Source: ${definition.source}`);
@@ -255,6 +328,8 @@ for (const word of malayWords) {
     console.log(`\n${word}:`);
     result.definitions.forEach((def, index) => {
       console.log(`  ${index + 1}. ${def.malayDefinition} (${def.source})`);
+      if (def.phonetic) console.log(`     Phonetic: [${def.phonetic}]`);
+      if (def.jawi) console.log(`     Jawi: ${def.jawi}`);
     });
   }
 }
@@ -273,7 +348,6 @@ const dictionary = new MalayDictionary({
 
 // Search with all options enabled
 const result = await dictionary.search('berlari', {
-  includeRelated: true,
   includePeribahasa: true,
   includeTesaurus: true
 });
@@ -282,6 +356,8 @@ const result = await dictionary.search('berlari', {
 result.definitions.forEach((def, index) => {
   console.log(`\nDefinition ${index + 1} (${def.source}):`);
   console.log(`  Word: ${def.word}`);
+  console.log(`  Phonetic: [${def.phonetic || 'N/A'}]`);
+  console.log(`  Jawi: ${def.jawi || 'N/A'}`);
   console.log(`  Part of Speech: ${def.partOfSpeech || 'N/A'}`);
   console.log(`  Context: ${def.context || 'N/A'}`);
   console.log(`  Malay Definition: ${def.malayDefinition}`);
@@ -297,14 +373,6 @@ const pelajarDefinitions = result.definitions.filter(def =>
 
 console.log(`\nFound ${dewanDefinitions.length} Dewan definitions and ${pelajarDefinitions.length} Pelajar definitions`);
 
-// Process related services
-if (result.relatedServices) {
-  console.log('\nRelated Services:');
-  result.relatedServices.forEach(service => {
-    console.log(`  ${service.name}: ${service.count} results`);
-  });
-}
-
 // Process peribahasa (proverbs)
 if (result.peribahasa) {
   console.log('\nPeribahasa (Proverbs):');
@@ -313,6 +381,12 @@ if (result.peribahasa) {
     console.log(`  ${peribahasa.englishText}`);
     console.log(`  ${peribahasa.explanation}`);
   });
+}
+
+// Process thesaurus
+if (result.tesaurus) {
+  console.log('\nThesaurus:');
+  console.log(`  ${result.tesaurus}`);
 }
 ```
 
@@ -334,12 +408,14 @@ console.log('Searching multiple words...');
 const results = await dictionary.searchMultiple(words);
 
 // Create a comprehensive dictionary with all definitions
-const dictionaryMap = new Map<string, Array<{definition: string, source: string}>>();
+const dictionaryMap = new Map<string, Array<{definition: string, source: string, phonetic?: string, jawi?: string}>>();
 results.forEach((result, word) => {
   if (result.hasResults) {
     const definitions = result.definitions.map(def => ({
       definition: def.malayDefinition,
-      source: def.source
+      source: def.source,
+      phonetic: def.phonetic,
+      jawi: def.jawi
     }));
     dictionaryMap.set(word, definitions);
   }
@@ -350,52 +426,11 @@ dictionaryMap.forEach((definitions, word) => {
   console.log(`\n${word}:`);
   definitions.forEach((def, index) => {
     console.log(`  ${index + 1}. ${def.definition} (${def.source})`);
+    if (def.phonetic) console.log(`     Phonetic: [${def.phonetic}]`);
+    if (def.jawi) console.log(`     Jawi: ${def.jawi}`);
   });
 });
 ```
-
-## Command Line Interface
-
-The library includes a CLI tool for quick dictionary lookups:
-
-### Basic Usage
-
-```bash
-# English to Malay lookup (default behavior)
-npx ts-node src/cli.ts hello
-
-# Malay to Malay lookup
-npx ts-node src/cli.ts makan
-
-# Get full results including related services and proverbs
-npx ts-node src/cli.ts computer --verbose
-
-# Output in JSON format
-npx ts-node src/cli.ts "hello world" --json
-```
-
-### Advanced Options
-
-```bash
-# Custom delay and timeout
-npx ts-node src/cli.ts reluctant --delay 2000 --timeout 45000
-
-# Custom retry attempts
-npx ts-node src/cli.ts computer --retries 5
-
-# Get help
-npx ts-node src/cli.ts --help
-```
-
-### CLI Options
-
-- `--word <word>` - Word to search for
-- `--delay <ms>` - Delay between requests (default: 1000)
-- `--timeout <ms>` - Request timeout (default: 30000)
-- `--retries <number>` - Number of retries (default: 3)
-- `--verbose` - Get full results including multiple definitions from different sources, related services and proverbs
-- `--json` - Output in JSON format
-- `--help` - Show help message
 
 ## Error Handling
 

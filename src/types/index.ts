@@ -1,5 +1,7 @@
 export interface DBPDefinition {
   word: string;
+  phonetic?: string;
+  jawi?: string;
   partOfSpeech?: string;
   context?: string;
   malayDefinition: string;
