@@ -1,0 +1,48 @@
+{
+  "name": "malay-dictionary",
+  "version": "1.0.0",
+  "description": "A Node.js library to access Malay definitions from Dewan Bahasa dan Pustaka (DBP) website",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "example": "ts-node src/example.ts",
+    "test-parsing": "ts-node src/test-parsing.ts",
+    "cli": "ts-node src/cli.ts",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts"
+  },
+  "keywords": [
+    "malay",
+    "dictionary",
+    "scraper",
+    "dbp",
+    "dewan-bahasa-pustaka",
+    "translation",
+    "english-to-malay"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "user-agents": "^1.0.1354"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.0",
+    "@types/jest": "^29.5.0",
+    "@typescript-eslint/eslint-plugin": "^6.8.0",
+    "@typescript-eslint/parser": "^6.8.0",
+    "eslint": "^8.51.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.0.3",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.2.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+} 

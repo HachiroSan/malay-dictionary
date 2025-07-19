@@ -1,0 +1,15 @@
+curl ^"https://prpm.dbp.gov.my/Cari1?keyword=reluctant^" ^
+  -H ^"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:139.0) Gecko/20100101 Firefox/139.0^" ^
+  -H ^"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8^" ^
+  -H ^"Accept-Language: en-US,en;q=0.5^" ^
+  -H ^"Accept-Encoding: gzip, deflate, br, zstd^" ^
+  -H ^"Referer: https://prpm.dbp.gov.my/Cari1?keyword=reluctant^" ^
+  -H ^"Sec-GPC: 1^" ^
+  -H ^"Connection: keep-alive^" ^
+  -H ^"Cookie: ASP.NET_SessionId=dxnhhzqhw3ryxhxdqmqsuc2s; __AntiXsrfToken=39161f20b0744ec0a70e1e51366dd6ee^" ^
+  -H ^"Upgrade-Insecure-Requests: 1^" ^
+  -H ^"Sec-Fetch-Dest: document^" ^
+  -H ^"Sec-Fetch-Mode: navigate^" ^
+  -H ^"Sec-Fetch-Site: same-origin^" ^
+  -H ^"Sec-Fetch-User: ?1^" ^
+  -H ^"Priority: u=0, i^"
