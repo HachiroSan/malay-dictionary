@@ -105,7 +105,7 @@ async function main() {
     
     if (options.verbose) {
       const result = await dictionary.search(options.word, {
-        includeRelated: true,
+        includeRelated: false,
         includePeribahasa: true,
         includeTesaurus: true
       });
@@ -117,6 +117,8 @@ async function main() {
           console.log('\nDefinitions:');
           result.definitions.forEach((def, index) => {
             console.log(`\n   ${index + 1}. ${def.word}`);
+            if (def.phonetic) console.log(`      Phonetic: [${def.phonetic}]`);
+            if (def.jawi) console.log(`      Jawi: ${def.jawi}`);
             if (def.partOfSpeech) console.log(`      Part of Speech: ${def.partOfSpeech}`);
             if (def.context) console.log(`      Context: ${def.context}`);
             console.log(`      Malay: ${def.malayDefinition}`);
