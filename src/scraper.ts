@@ -145,9 +145,24 @@ export class MalayDictionary {
     // Remove extra whitespace and normalize
     text = text.replace(/\s+/g, ' ').trim();
     
-    // Extract the word from the URL or context
-    const wordMatch = text.match(/([a-zA-Z]+)/);
-    const word = wordMatch ? wordMatch[1] : '';
+    // Extract phonetic transcription and Jawi script
+    let phonetic: string | undefined;
+    let jawi: string | undefined;
+    let word = '';
+    
+    // Look for phonetic pattern: [ber.la.ri] | برلاري
+    const phoneticMatch = text.match(/\[([^\]]+)\]\s*\|\s*([^\s]+?)(?=Definisi|$)/);
+    if (phoneticMatch) {
+      phonetic = phoneticMatch[1]; // [ber.la.ri]
+      jawi = phoneticMatch[2]; // برلاري
+      
+      // Extract the actual word from phonetic transcription by removing dots
+      word = phonetic.replace(/\./g, '');
+    } else {
+      // Fallback: extract the word from the URL or context
+      const wordMatch = text.match(/([a-zA-Z]+)/);
+      word = wordMatch ? wordMatch[1] : '';
+    }
     
     // Look for the definition pattern
     const definitionMatch = text.match(/Definisi\s*:\s*(.*?)(?=\s*\(Kamus|$)/i);
@@ -186,6 +201,8 @@ export class MalayDictionary {
 
     return {
       word,
+      phonetic,
+      jawi,
       partOfSpeech,
       context,
       malayDefinition,

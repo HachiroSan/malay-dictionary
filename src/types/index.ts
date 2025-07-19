@@ -1,5 +1,7 @@
 export interface DBPDefinition {
   word: string;
+  phonetic?: string;
+  jawi?: string;
   partOfSpeech?: string;
   context?: string;
   malayDefinition: string;
@@ -30,12 +32,23 @@ export interface Peribahasa {
   count: number;
 }
 
+export interface ProxyConfig {
+  host: string;
+  port: number;
+  protocol?: 'http' | 'https';
+  auth?: {
+    username: string;
+    password: string;
+  };
+}
+
 export interface ScraperOptions {
   userAgent?: string;
   timeout?: number;
   retries?: number;
   delay?: number;
   followRedirects?: boolean;
+  proxy?: ProxyConfig;
 }
 
 export interface SearchOptions extends ScraperOptions {
