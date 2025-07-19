@@ -1,4 +1,4 @@
-# Malay Dictionary
+![Malay Dictionary Banner](assets/images/banner.png)
 
 A Node.js library to access Malay definitions from the Dewan Bahasa dan Pustaka (DBP) website. This library allows you to search for both English words and Malay words, providing comprehensive Malay definitions, along with related information like proverbs (peribahasa) and thesaurus data.
 
