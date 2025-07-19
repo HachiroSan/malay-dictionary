@@ -1,7 +1,7 @@
 {
   "name": "malay-dictionary",
   "version": "1.0.0",
-  "description": "A Node.js library to access Malay definitions from Dewan Bahasa dan Pustaka (DBP) website",
+  "description": "A Node.js library to access Malay definitions from Dewan Bahasa dan Pustaka (DBP) website. Supports both English-Malay and Malay-Malay dictionary lookups.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -21,28 +21,30 @@
     "dbp",
     "dewan-bahasa-pustaka",
     "translation",
-    "english-to-malay"
+    "english-to-malay",
+    "malay-to-malay",
+    "malay-lexicon"
   ],
   "author": "Your Name",
   "license": "MIT",
   "dependencies": {
-    "axios": "^1.6.0",
-    "cheerio": "^1.0.0-rc.12",
-    "user-agents": "^1.0.1354"
+    "axios": "^1.10.0",
+    "cheerio": "^1.1.0",
+    "user-agents": "^1.1.605"
   },
   "devDependencies": {
-    "@types/node": "^20.8.0",
-    "@types/jest": "^29.5.0",
-    "@typescript-eslint/eslint-plugin": "^6.8.0",
-    "@typescript-eslint/parser": "^6.8.0",
-    "eslint": "^8.51.0",
-    "jest": "^29.7.0",
-    "prettier": "^3.0.3",
-    "ts-jest": "^29.1.0",
-    "ts-node": "^10.9.0",
-    "typescript": "^5.2.0"
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.15",
+    "@typescript-eslint/eslint-plugin": "^8.37.0",
+    "@typescript-eslint/parser": "^8.37.0",
+    "eslint": "^9.31.0",
+    "jest": "^30.0.4",
+    "prettier": "^3.6.2",
+    "ts-jest": "^29.4.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   },
   "engines": {
     "node": ">=16.0.0"
   }
-} 
+}

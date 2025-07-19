@@ -9,12 +9,14 @@ async function example() {
   });
 
   try {
+    // Example 1: English to Malay
+    console.log('=== ENGLISH TO MALAY ===');
     console.log('Searching for "hello"...');
-    const result = await dictionary.search('hello');
+    const englishResult = await dictionary.search('hello');
     
-    if (result.hasResults) {
+    if (englishResult.hasResults) {
       console.log('Found results:');
-      result.definitions.forEach((def, index) => {
+      englishResult.definitions.forEach((def, index) => {
         console.log(`\nDefinition ${index + 1}:`);
         console.log(`   Word: ${def.word}`);
         console.log(`   Part of Speech: ${def.partOfSpeech || 'N/A'}`);
@@ -26,18 +28,46 @@ async function example() {
       console.log('No results found');
     }
 
-    // Get related services
-    if (result.relatedServices && result.relatedServices.length > 0) {
+    // Example 2: Malay to Malay with Multiple Definitions
+    console.log('\n=== MALAY TO MALAY (MULTIPLE DEFINITIONS) ===');
+    console.log('Searching for "berlari"...');
+    const malayResult = await dictionary.search('berlari');
+    
+    if (malayResult.hasResults) {
+      console.log(`Found ${malayResult.definitions.length} definition(s) from different sources:`);
+      malayResult.definitions.forEach((def, index) => {
+        console.log(`\nDefinition ${index + 1} (${def.source}):`);
+        console.log(`   Word: ${def.word}`);
+        console.log(`   Part of Speech: ${def.partOfSpeech || 'N/A'}`);
+        console.log(`   Context: ${def.context || 'N/A'}`);
+        console.log(`   Malay Definition: ${def.malayDefinition}`);
+      });
+      
+      // Demonstrate filtering by source
+      const dewanDefinitions = malayResult.definitions.filter(def => 
+        def.source.includes('Dewan')
+      );
+      const pelajarDefinitions = malayResult.definitions.filter(def => 
+        def.source.includes('Pelajar')
+      );
+      
+      console.log(`\nSummary: ${dewanDefinitions.length} Dewan definition(s), ${pelajarDefinitions.length} Pelajar definition(s)`);
+    } else {
+      console.log('No results found');
+    }
+
+    // Get related services (for English search)
+    if (englishResult.relatedServices && englishResult.relatedServices.length > 0) {
       console.log('\nRelated Services:');
-      result.relatedServices.forEach(service => {
+      englishResult.relatedServices.forEach(service => {
         console.log(`   ${service.name} (${service.count} results)`);
       });
     }
 
-    // Get peribahasa (proverbs)
-    if (result.peribahasa && result.peribahasa.length > 0) {
+    // Get peribahasa (proverbs) - for Malay search
+    if (malayResult.peribahasa && malayResult.peribahasa.length > 0) {
       console.log('\nPeribahasa (Proverbs):');
-      result.peribahasa.forEach(peribahasa => {
+      malayResult.peribahasa.forEach(peribahasa => {
         console.log(`   ID: ${peribahasa.id}`);
         console.log(`   Malay: ${peribahasa.malayText}`);
         console.log(`   English: ${peribahasa.englishText}`);
@@ -51,12 +81,21 @@ async function example() {
     console.error('Error:', error);
   }
 
-  // Example: Get simple definition
+  // Example: Get simple definitions
   try {
-    console.log('\nGetting simple definition for "reluctant"...');
-    const definition = await dictionary.getDefinition('reluctant');
-    if (definition) {
-      console.log(`Definition: ${definition}`);
+    console.log('\n=== SIMPLE DEFINITIONS ===');
+    console.log('Getting simple definition for "reluctant"...');
+    const englishDefinition = await dictionary.getDefinition('reluctant');
+    if (englishDefinition) {
+      console.log(`English "reluctant": ${englishDefinition}`);
+    } else {
+      console.log('No definition found');
+    }
+
+    console.log('Getting simple definition for "rumah"...');
+    const malayDefinition = await dictionary.getDefinition('rumah');
+    if (malayDefinition) {
+      console.log(`Malay "rumah": ${malayDefinition}`);
     } else {
       console.log('No definition found');
     }
@@ -64,10 +103,11 @@ async function example() {
     console.error('Error:', error);
   }
 
-  // Example: Search multiple words
+  // Example: Search multiple words (mixed English and Malay)
   try {
-    console.log('\nSearching multiple words...');
-    const words = ['hello', 'world', 'computer'];
+    console.log('\n=== BATCH SEARCH (MIXED) ===');
+    console.log('Searching multiple words (English and Malay)...');
+    const words = ['hello', 'makan', 'computer', 'rumah'];
     const results = await dictionary.searchMultiple(words, {
       includeRelated: false,
       includePeribahasa: false,
