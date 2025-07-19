@@ -1,6 +1,6 @@
 # Malay Dictionary
 
-A Node.js library to access Malay definitions from the Dewan Bahasa dan Pustaka (DBP) website. This library allows you to search for English words and get their Malay definitions, along with related information like proverbs (peribahasa) and related services.
+A Node.js library to access Malay definitions from the Dewan Bahasa dan Pustaka (DBP) website. This library allows you to search for both English words and Malay words, providing comprehensive Malay definitions, along with related information like proverbs (peribahasa) and related services.
 
 ## Table of Contents
 
@@ -13,6 +13,8 @@ A Node.js library to access Malay definitions from the Dewan Bahasa dan Pustaka 
   - [Data Types](#data-types)
 - [Examples](#examples)
   - [Basic Usage](#basic-usage)
+  - [English to Malay](#english-to-malay)
+  - [Malay to Malay](#malay-to-malay)
   - [Advanced Usage](#advanced-usage)
   - [Batch Processing](#batch-processing)
 - [Command Line Interface](#command-line-interface)
@@ -21,16 +23,15 @@ A Node.js library to access Malay definitions from the Dewan Bahasa dan Pustaka 
   - [CLI Options](#cli-options)
 - [Error Handling](#error-handling)
 - [Rate Limiting and Best Practices](#rate-limiting-and-best-practices)
-- [Technical Details](#technical-details)
-  - [Website Analysis](#website-analysis)
-  - [Content Structure](#content-structure)
 - [Contributing](#contributing)
 - [License](#license)
 - [Disclaimer](#disclaimer)
 
 ## Features
 
-- Search English words and get Malay definitions
+- Search English words and get Malay definitions (English-Malay dictionary)
+- Search Malay words and get comprehensive Malay definitions (Malay-Malay dictionary)
+- **Multiple definitions from different sources** - Get definitions from various DBP dictionaries (Kamus Dewan, Kamus Pelajar, etc.)
 - Extract structured definition data (part of speech, context, etc.)
 - Get related proverbs (peribahasa) and their explanations
 - Access related services and resources
@@ -81,6 +82,17 @@ if (result.hasResults) {
 ### MalayDictionary
 
 The main class for interacting with the DBP website.
+
+### Multiple Definitions from Different Sources
+
+The library captures definitions from multiple DBP dictionaries, providing comprehensive coverage:
+
+- **Kamus Dewan Edisi Keempat** - Comprehensive definitions with extensive examples
+- **Kamus Pelajar Edisi Kedua** - Simplified definitions for students
+- **Kamus Inggeris-Melayu Dewan** - English to Malay translations
+- **Other DBP dictionaries** - Various specialized dictionaries
+
+Each definition includes the source dictionary, allowing developers to choose the most appropriate definition for their use case.
 
 #### Constructor
 
@@ -209,6 +221,45 @@ if (result.hasResults) {
 }
 ```
 
+### English to Malay
+
+```typescript
+import { MalayDictionary } from './src/index';
+
+const dictionary = new MalayDictionary();
+
+// Search English words for Malay definitions
+const englishWords = ['hello', 'computer', 'beautiful'];
+
+for (const word of englishWords) {
+  const result = await dictionary.search(word);
+  if (result.hasResults) {
+    console.log(`${word}: ${result.definitions[0].malayDefinition}`);
+  }
+}
+```
+
+### Malay to Malay
+
+```typescript
+import { MalayDictionary } from './src/index';
+
+const dictionary = new MalayDictionary();
+
+// Search Malay words for comprehensive Malay definitions
+const malayWords = ['makan', 'rumah', 'cantik'];
+
+for (const word of malayWords) {
+  const result = await dictionary.search(word);
+  if (result.hasResults) {
+    console.log(`\n${word}:`);
+    result.definitions.forEach((def, index) => {
+      console.log(`  ${index + 1}. ${def.malayDefinition} (${def.source})`);
+    });
+  }
+}
+```
+
 ### Advanced Usage
 
 ```typescript
@@ -221,21 +272,30 @@ const dictionary = new MalayDictionary({
 });
 
 // Search with all options enabled
-const result = await dictionary.search('computer', {
+const result = await dictionary.search('berlari', {
   includeRelated: true,
   includePeribahasa: true,
   includeTesaurus: true
 });
 
-// Process definitions
+// Process multiple definitions from different sources
 result.definitions.forEach((def, index) => {
-  console.log(`\nDefinition ${index + 1}:`);
+  console.log(`\nDefinition ${index + 1} (${def.source}):`);
   console.log(`  Word: ${def.word}`);
   console.log(`  Part of Speech: ${def.partOfSpeech || 'N/A'}`);
   console.log(`  Context: ${def.context || 'N/A'}`);
   console.log(`  Malay Definition: ${def.malayDefinition}`);
-  console.log(`  Source: ${def.source}`);
 });
+
+// Filter definitions by source
+const dewanDefinitions = result.definitions.filter(def => 
+  def.source.includes('Dewan')
+);
+const pelajarDefinitions = result.definitions.filter(def => 
+  def.source.includes('Pelajar')
+);
+
+console.log(`\nFound ${dewanDefinitions.length} Dewan definitions and ${pelajarDefinitions.length} Pelajar definitions`);
 
 // Process related services
 if (result.relatedServices) {
@@ -265,24 +325,33 @@ const dictionary = new MalayDictionary({ delay: 1000 });
 
 const words = [
   'hello',
-  'world',
+  'makan',
   'computer',
-  'internet',
-  'software'
+  'rumah'
 ];
 
 console.log('Searching multiple words...');
 const results = await dictionary.searchMultiple(words);
 
-// Create a simple dictionary
-const dictionaryMap = new Map<string, string>();
+// Create a comprehensive dictionary with all definitions
+const dictionaryMap = new Map<string, Array<{definition: string, source: string}>>();
 results.forEach((result, word) => {
   if (result.hasResults) {
-    dictionaryMap.set(word, result.definitions[0].malayDefinition);
+    const definitions = result.definitions.map(def => ({
+      definition: def.malayDefinition,
+      source: def.source
+    }));
+    dictionaryMap.set(word, definitions);
   }
 });
 
-console.log('Dictionary:', Object.fromEntries(dictionaryMap));
+// Display results with sources
+dictionaryMap.forEach((definitions, word) => {
+  console.log(`\n${word}:`);
+  definitions.forEach((def, index) => {
+    console.log(`  ${index + 1}. ${def.definition} (${def.source})`);
+  });
+});
 ```
 
 ## Command Line Interface
@@ -292,8 +361,11 @@ The library includes a CLI tool for quick dictionary lookups:
 ### Basic Usage
 
 ```bash
-# Simple definition lookup (default behavior)
+# English to Malay lookup (default behavior)
 npx ts-node src/cli.ts hello
+
+# Malay to Malay lookup
+npx ts-node src/cli.ts makan
 
 # Get full results including related services and proverbs
 npx ts-node src/cli.ts computer --verbose
@@ -321,7 +393,7 @@ npx ts-node src/cli.ts --help
 - `--delay <ms>` - Delay between requests (default: 1000)
 - `--timeout <ms>` - Request timeout (default: 30000)
 - `--retries <number>` - Number of retries (default: 3)
-- `--verbose` - Get full results including related services and proverbs
+- `--verbose` - Get full results including multiple definitions from different sources, related services and proverbs
 - `--json` - Output in JSON format
 - `--help` - Show help message
 
@@ -363,28 +435,6 @@ const dictionary = new MalayDictionary({
   retries: 3,
   timeout: 30000
 });
-```
-
-## Technical Details
-
-### Website Analysis
-
-The DBP website uses:
-- Framework: ASP.NET Web Forms
-- Frontend: jQuery, Bootstrap, jQuery UI
-- Content: Server-side rendered HTML
-- Security: Anti-CSRF tokens
-- Structure: Table-based layout with specific CSS classes
-
-### Content Structure
-
-Definitions are found in:
-- Primary: `.tab-pane.fade.in.active` elements
-- Fallback: Elements containing "Definisi :" text
-
-Definition format:
-```
-Definisi : part_of_speech (context) malay_definition (Kamus Inggeris-Melayu Dewan)
 ```
 
 ## Contributing

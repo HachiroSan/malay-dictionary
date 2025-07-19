@@ -85,8 +85,8 @@ export class MalayDictionary {
   private extractDefinitions($: cheerio.CheerioAPI): DBPDefinition[] {
     const definitions: DBPDefinition[] = [];
 
-    // Look for the definition in the tab content
-    $('.tab-pane.fade.in.active').each((_, element) => {
+    // Look for all definition tabs, not just the active one
+    $('.tab-pane.fade').each((_, element) => {
       const $element = $(element);
       const definitionText = $element.text().trim();
       
@@ -94,6 +94,27 @@ export class MalayDictionary {
         const definition = this.parseDefinitionText(definitionText);
         if (definition) {
           definitions.push(definition);
+        }
+      }
+    });
+
+    // Also check the active tab
+    $('.tab-pane.fade.in.active').each((_, element) => {
+      const $element = $(element);
+      const definitionText = $element.text().trim();
+      
+      if (definitionText && definitionText.includes('Definisi :')) {
+        const definition = this.parseDefinitionText(definitionText);
+        if (definition) {
+          // Check if this definition is already captured to avoid duplicates
+          const isDuplicate = definitions.some(existingDef => 
+            existingDef.malayDefinition === definition.malayDefinition &&
+            existingDef.source === definition.source
+          );
+          
+          if (!isDuplicate) {
+            definitions.push(definition);
+          }
         }
       }
     });

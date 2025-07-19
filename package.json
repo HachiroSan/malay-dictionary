@@ -1,7 +1,7 @@
 {
   "name": "malay-dictionary",
   "version": "1.0.0",
-  "description": "A Node.js library to access Malay definitions from Dewan Bahasa dan Pustaka (DBP) website",
+  "description": "A Node.js library to access Malay definitions from Dewan Bahasa dan Pustaka (DBP) website. Supports both English-Malay and Malay-Malay dictionary lookups.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -21,7 +21,9 @@
     "dbp",
     "dewan-bahasa-pustaka",
     "translation",
-    "english-to-malay"
+    "english-to-malay",
+    "malay-to-malay",
+    "malay-lexicon"
   ],
   "author": "Your Name",
   "license": "MIT",
