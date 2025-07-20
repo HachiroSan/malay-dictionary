@@ -1,4 +1,4 @@
-# Malay Dictionary
+![Malay Dictionary Banner](assets/images/banner.png)
 
 A Node.js library to access Malay definitions from the Dewan Bahasa dan Pustaka (DBP) website. This library allows you to search for both English words and Malay words, providing comprehensive Malay definitions, along with related information like proverbs (peribahasa) and thesaurus data.
 
@@ -29,18 +29,18 @@ A Node.js library to access Malay definitions from the Dewan Bahasa dan Pustaka 
 
 ## Features
 
-- **🔤 Phonetic Transcription** - Get pronunciation guides like `[ber.la.ri]`
-- **📝 Jawi Script** - Access traditional Malay script like `برلاري`
-- **📚 Multiple Sources** - Definitions from Kamus Dewan, Kamus Pelajar, and more
-- **🌍 Bilingual Support** - Search English words for Malay definitions
-- **📖 Comprehensive Definitions** - Part of speech, context, and detailed explanations
-- **📜 Proverbs & Thesaurus** - Access peribahasa and related words
-- **⚡ CLI Tool** - Command-line interface for quick lookups
-- **🔄 Batch Processing** - Search multiple words efficiently
-- **🛡️ Error Handling** - Robust error handling and retry logic
-- **⚙️ Configurable** - Customizable timeouts, delays, and retries
-- **📊 Rate Limit Analysis** - Comprehensive rate limiting testing and analysis
-- **📦 TypeScript** - Full TypeScript support with type definitions
+- Phonetic Transcriptions - Includes pronunciation guides in IPA format (e.g., `[ber.la.ri]`)
+- Jawi Script Support - Displays words in traditional Malay-Arabic script (e.g., `برلاري`)
+- Multiple Authoritative Sources - Pulls definitions from Kamus Dewan, Kamus Pelajar, and other trusted references
+- Bilingual Dictionary - Look up Malay definitions for English words
+- Detailed Definitions - Includes part of speech, usage examples, and nuanced explanations
+- Proverbs & Synonyms - Access Malay proverbs (peribahasa) and thesaurus entries
+- Command Line Interface - Quick terminal-based lookups with the included CLI tool
+- Batch Word Processing - Efficiently search multiple words in sequence
+- Resilient Error Handling - Built-in retry mechanism and comprehensive error recovery
+- Flexible Configuration - Adjustable timeouts, request delays, and retry attempts
+- Proxy Integration - Supports authenticated HTTP/HTTPS proxies for secure requests
+- TypeScript Ready - Complete with type definitions for seamless TypeScript integration
 
 ## Installation
 
@@ -92,6 +92,31 @@ if (result.hasResults) {
 }
 ```
 
+### Using with Proxy
+
+```typescript
+import { MalayDictionary } from './src/index';
+
+// Create a dictionary instance with proxy
+const dictionary = new MalayDictionary({
+  timeout: 30000,
+  delay: 1000,
+  retries: 3,
+  proxy: {
+    host: 'proxy.example.com',
+    port: 8080,
+    protocol: 'http',
+    auth: {
+      username: 'user',
+      password: 'pass'
+    }
+  }
+});
+
+// Search for a word through proxy
+const result = await dictionary.search('berlari');
+```
+
 ### Usage as Installed Package
 
 ```typescript
@@ -108,6 +133,24 @@ if (result.hasResults) {
   console.log(`Phonetic: [${result.definitions[0].phonetic}]`);
   console.log(`Jawi: ${result.definitions[0].jawi}`);
 }
+```
+
+### Using with Proxy (Installed Package)
+
+```typescript
+import { MalayDictionary } from 'malay-dictionary';
+
+// Create a dictionary instance with proxy
+const dictionary = new MalayDictionary({
+  proxy: {
+    host: 'proxy.example.com',
+    port: 8080,
+    protocol: 'http'
+  }
+});
+
+// Search for a word through proxy
+const result = await dictionary.search('makan');
 ```
 
 ## Command Line Interface
@@ -147,6 +190,12 @@ npx ts-node src/cli.ts rumah
 
 # Custom settings
 npx ts-node src/cli.ts reluctant --delay 2000 --timeout 45000 --retries 5
+
+# Using proxy
+npx ts-node src/cli.ts hello --proxy http://proxy.example.com:8080
+
+# Using proxy with authentication
+npx ts-node src/cli.ts hello --proxy http://user:pass@proxy.example.com:8080
 ```
 
 ### CLI Options
@@ -155,6 +204,7 @@ npx ts-node src/cli.ts reluctant --delay 2000 --timeout 45000 --retries 5
 - `--delay <ms>` - Delay between requests (default: 1000)
 - `--timeout <ms>` - Request timeout (default: 30000)
 - `--retries <number>` - Number of retries (default: 3)
+- `--proxy <url>` - Proxy URL (e.g., `http://proxy:8080` or `http://user:pass@proxy:8080`)
 - `--verbose` - Get full results including multiple definitions, phonetic transcription, Jawi script, and thesaurus
 - `--json` - Output in JSON format
 - `--help` - Show help message
@@ -177,6 +227,7 @@ new MalayDictionary(options?: SearchOptions)
 - `retries?: number` - Number of retry attempts (default: 3)
 - `userAgent?: string` - Custom user agent string
 - `followRedirects?: boolean` - Whether to follow redirects (default: true)
+- `proxy?: ProxyConfig` - Proxy configuration for HTTP/HTTPS requests
 
 #### Methods
 
@@ -272,6 +323,20 @@ interface Peribahasa {
 }
 ```
 
+#### ProxyConfig
+
+```typescript
+interface ProxyConfig {
+  host: string;
+  port: number;
+  protocol?: 'http' | 'https';
+  auth?: {
+    username: string;
+    password: string;
+  };
+}
+```
+
 ## Examples
 
 ### Basic Usage
@@ -348,6 +413,33 @@ const dictionary = new MalayDictionary({
 });
 
 // Search with all options enabled
+const result = await dictionary.search('berlari', {
+  includePeribahasa: true,
+  includeTesaurus: true
+});
+```
+
+### Advanced Usage with Proxy
+
+```typescript
+import { MalayDictionary } from './src/index';
+
+const dictionary = new MalayDictionary({
+  timeout: 45000,
+  delay: 2000,
+  retries: 5,
+  proxy: {
+    host: 'proxy.example.com',
+    port: 8080,
+    protocol: 'http',
+    auth: {
+      username: 'user',
+      password: 'pass'
+    }
+  }
+});
+
+// Search with all options enabled through proxy
 const result = await dictionary.search('berlari', {
   includePeribahasa: true,
   includeTesaurus: true
@@ -456,44 +548,15 @@ try {
 }
 ```
 
-## Rate Limiting Analysis and Best Practices
+## Rate Limiting and Best Practices
 
-### Rate Limiting Test Results
+To be respectful to the DBP website:
 
-I conducted comprehensive rate limiting analysis on the DBP website (https://prpm.dbp.gov.my) with the following findings:
-
-**Key Finding**: **No rate limiting detected** in any test scenario
-
-#### Test Results Summary
-
-| Test Scenario | Requests | Interval | Success Rate | Avg Response Time | Rate Limited |
-|---------------|----------|----------|--------------|-------------------|--------------|
-| Slow Sequential (1 req/2s) | 10 | 2000ms | 100% | 315.70ms | ❌ No |
-| Moderate Sequential (1 req/1s) | 15 | 1000ms | 100% | 271.00ms | ❌ No |
-| Fast Sequential (1 req/500ms) | 20 | 500ms | 100% | 288.20ms | ❌ No |
-| Very Fast Sequential (1 req/200ms) | 25 | 200ms | 100% | 281.24ms | ❌ No |
-| Burst Requests (5 concurrent) | 5 | 0ms | 100% | 457.40ms | ❌ No |
-| Large Burst (10 concurrent) | 10 | 0ms | 100% | 444.50ms | ❌ No |
-| Sustained Fast Rate (1 req/100ms) | 30 | 100ms | 100% | 291.77ms | ❌ No |
-
-#### Analysis Details
-
-- **Total Tests**: 7 scenarios, 115 total requests
-- **Success Rate**: 100% across all tests
-- **Response Times**: Consistent 271-457ms average
-- **No Rate Limiting**: No HTTP 429, 403, or 503 responses detected
-- **High Tolerance**: Even 10 requests per second were successful
-
-For detailed analysis, see [RATE_LIMIT_FINDINGS.md](./RATE_LIMIT_FINDINGS.md).
-
-### Recommended Best Practices
-
-Despite no rate limiting being detected, we recommend these respectful practices:
-
-1. **Conservative Approach**: Use 1-2 second delays between requests
-2. **Monitor Performance**: Track response times and error rates
-3. **Implement Backoff**: Use exponential backoff for retries if needed
-4. **Respectful Limits**: Limit concurrent requests to 5-10 maximum
+1. Use delays between requests: Set a reasonable delay (1-2 seconds)
+2. Implement retry logic: Use the built-in retry mechanism
+3. Handle errors gracefully: Always wrap calls in try-catch blocks
+4. Don't overwhelm the server: Avoid making too many requests simultaneously
+5. Use proxies when needed: Configure proxy settings for network restrictions
 
 ```typescript
 // Recommended settings for production
@@ -501,9 +564,11 @@ const dictionary = new MalayDictionary({
   delay: 1000, // 1 second delay
   retries: 3,
   timeout: 30000,
-  // Additional recommended settings
-  maxConcurrentRequests: 5,
-  maxRequestsPerMinute: 30
+  proxy: {
+    host: 'proxy.example.com',
+    port: 8080,
+    protocol: 'http'
+  }
 });
 ```
 

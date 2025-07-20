@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { MalayDictionary } from './index';
+import { ProxyConfig } from './types';
 
 interface CLIOptions {
   word?: string;
@@ -10,6 +11,7 @@ interface CLIOptions {
   verbose?: boolean;
   json?: boolean;
   help?: boolean;
+  proxy?: ProxyConfig;
 }
 
 function printHelp() {
@@ -27,6 +29,7 @@ Options:
   --retries <number>   Number of retries (default: 3)
   --verbose            Get full results including related services and proverbs
   --json               Output in JSON format
+  --proxy <url>        Proxy URL (e.g., http://proxy:8080 or http://user:pass@proxy:8080)
   --help               Show this help message
 
 Examples:
@@ -34,7 +37,33 @@ Examples:
   npx ts-node src/cli.ts computer --verbose
   npx ts-node src/cli.ts "hello world" --json
   npx ts-node src/cli.ts reluctant --delay 2000 --timeout 45000
+  npx ts-node src/cli.ts hello --proxy http://proxy.example.com:8080
+  npx ts-node src/cli.ts hello --proxy http://user:pass@proxy.example.com:8080
 `);
+}
+
+function parseProxyUrl(proxyUrl: string): ProxyConfig {
+  try {
+    const url = new URL(proxyUrl);
+    
+    const config: ProxyConfig = {
+      host: url.hostname,
+      port: parseInt(url.port, 10),
+      protocol: url.protocol.replace(':', '') as 'http' | 'https'
+    };
+
+    // Add authentication if provided
+    if (url.username && url.password) {
+      config.auth = {
+        username: decodeURIComponent(url.username),
+        password: decodeURIComponent(url.password)
+      };
+    }
+
+    return config;
+  } catch (error) {
+    throw new Error(`Invalid proxy URL: ${proxyUrl}. Expected format: http://host:port or http://user:pass@host:port`);
+  }
 }
 
 function parseArgs(args: string[]): CLIOptions {
@@ -68,6 +97,14 @@ function parseArgs(args: string[]): CLIOptions {
       case '-j':
         options.json = true;
         break;
+      case '--proxy':
+        try {
+          options.proxy = parseProxyUrl(args[++i]);
+        } catch (error) {
+          console.error('Error:', error instanceof Error ? error.message : error);
+          process.exit(1);
+        }
+        break;
       default:
         if (!options.word && !arg.startsWith('-')) {
           options.word = arg;
@@ -98,10 +135,16 @@ async function main() {
     const dictionary = new MalayDictionary({
       timeout: options.timeout || 30000,
       delay: options.delay || 1000,
-      retries: options.retries || 3
+      retries: options.retries || 3,
+      proxy: options.proxy
     });
     
     console.log(`Searching for: "${options.word}"`);
+    if (options.proxy) {
+      const protocol = options.proxy.protocol || 'http';
+      const auth = options.proxy.auth ? `${options.proxy.auth.username}:***@` : '';
+      console.log(`Using proxy: ${protocol}://${auth}${options.proxy.host}:${options.proxy.port}`);
+    }
     
     if (options.verbose) {
       const result = await dictionary.search(options.word, {

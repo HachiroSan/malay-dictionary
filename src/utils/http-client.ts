@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 // @ts-ignore
 import UserAgent from 'user-agents';
-import { ScraperOptions, DBPError } from '../types';
+import { ScraperOptions, DBPError, ProxyConfig } from '../types';
 
 interface ExtendedAxiosRequestConfig extends AxiosRequestConfig {
   retries?: number;
@@ -14,7 +14,8 @@ export class HttpClient {
   constructor(options: ScraperOptions = {}) {
     this.userAgent = new UserAgent();
     
-    this.client = axios.create({
+    // Configure proxy if provided
+    const axiosConfig: AxiosRequestConfig = {
       timeout: options.timeout || 30000,
       maxRedirects: options.followRedirects !== false ? 5 : 0,
       headers: {
@@ -31,7 +32,20 @@ export class HttpClient {
         'Sec-Fetch-User': '?1',
         'Priority': 'u=0, i'
       }
-    });
+    };
+
+    // Add proxy configuration if provided
+    if (options.proxy) {
+      const proxyUrl = this.buildProxyUrl(options.proxy);
+      axiosConfig.proxy = {
+        host: options.proxy.host,
+        port: options.proxy.port,
+        protocol: options.proxy.protocol || 'http',
+        auth: options.proxy.auth
+      };
+    }
+    
+    this.client = axios.create(axiosConfig);
 
     // Add request interceptor for retries
     this.client.interceptors.request.use(
@@ -72,6 +86,15 @@ export class HttpClient {
         }
       }
     );
+  }
+
+  /**
+   * Build proxy URL string for logging/debugging purposes
+   */
+  private buildProxyUrl(proxy: ProxyConfig): string {
+    const protocol = proxy.protocol || 'http';
+    const auth = proxy.auth ? `${proxy.auth.username}:${proxy.auth.password}@` : '';
+    return `${protocol}://${auth}${proxy.host}:${proxy.port}`;
   }
 
   async get(url: string, config?: ExtendedAxiosRequestConfig): Promise<AxiosResponse> {
