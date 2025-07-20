@@ -22,7 +22,7 @@ A Node.js library to access Malay definitions from the Dewan Bahasa dan Pustaka 
   - [Advanced Usage](#advanced-usage)
   - [Batch Processing](#batch-processing)
 - [Error Handling](#error-handling)
-- [Rate Limiting and Best Practices](#rate-limiting-and-best-practices)
+- [Rate Limiting Analysis and Best Practices](#rate-limiting-analysis-and-best-practices)
 - [Contributing](#contributing)
 - [License](#license)
 - [Disclaimer](#disclaimer)
@@ -39,6 +39,7 @@ A Node.js library to access Malay definitions from the Dewan Bahasa dan Pustaka 
 - **🔄 Batch Processing** - Search multiple words efficiently
 - **🛡️ Error Handling** - Robust error handling and retry logic
 - **⚙️ Configurable** - Customizable timeouts, delays, and retries
+- **📊 Rate Limit Analysis** - Comprehensive rate limiting testing and analysis
 - **📦 TypeScript** - Full TypeScript support with type definitions
 
 ## Installation
@@ -455,30 +456,56 @@ try {
 }
 ```
 
-## Rate Limiting and Best Practices
+## Rate Limiting Analysis and Best Practices
 
-To be respectful to the DBP website:
+### Rate Limiting Test Results
 
-1. Use delays between requests: Set a reasonable delay (1-2 seconds)
-2. Implement retry logic: Use the built-in retry mechanism
-3. Handle errors gracefully: Always wrap calls in try-catch blocks
-4. Don't overwhelm the server: Avoid making too many requests simultaneously
+I conducted comprehensive rate limiting analysis on the DBP website (https://prpm.dbp.gov.my) with the following findings:
+
+**Key Finding**: **No rate limiting detected** in any test scenario
+
+#### Test Results Summary
+
+| Test Scenario | Requests | Interval | Success Rate | Avg Response Time | Rate Limited |
+|---------------|----------|----------|--------------|-------------------|--------------|
+| Slow Sequential (1 req/2s) | 10 | 2000ms | 100% | 315.70ms | ❌ No |
+| Moderate Sequential (1 req/1s) | 15 | 1000ms | 100% | 271.00ms | ❌ No |
+| Fast Sequential (1 req/500ms) | 20 | 500ms | 100% | 288.20ms | ❌ No |
+| Very Fast Sequential (1 req/200ms) | 25 | 200ms | 100% | 281.24ms | ❌ No |
+| Burst Requests (5 concurrent) | 5 | 0ms | 100% | 457.40ms | ❌ No |
+| Large Burst (10 concurrent) | 10 | 0ms | 100% | 444.50ms | ❌ No |
+| Sustained Fast Rate (1 req/100ms) | 30 | 100ms | 100% | 291.77ms | ❌ No |
+
+#### Analysis Details
+
+- **Total Tests**: 7 scenarios, 115 total requests
+- **Success Rate**: 100% across all tests
+- **Response Times**: Consistent 271-457ms average
+- **No Rate Limiting**: No HTTP 429, 403, or 503 responses detected
+- **High Tolerance**: Even 10 requests per second were successful
+
+For detailed analysis, see [RATE_LIMIT_FINDINGS.md](./RATE_LIMIT_FINDINGS.md).
+
+### Recommended Best Practices
+
+Despite no rate limiting being detected, we recommend these respectful practices:
+
+1. **Conservative Approach**: Use 1-2 second delays between requests
+2. **Monitor Performance**: Track response times and error rates
+3. **Implement Backoff**: Use exponential backoff for retries if needed
+4. **Respectful Limits**: Limit concurrent requests to 5-10 maximum
 
 ```typescript
+// Recommended settings for production
 const dictionary = new MalayDictionary({
-  delay: 2000, // 2 second delay
+  delay: 1000, // 1 second delay
   retries: 3,
-  timeout: 30000
+  timeout: 30000,
+  // Additional recommended settings
+  maxConcurrentRequests: 5,
+  maxRequestsPerMinute: 30
 });
 ```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
 
 ## License
 
